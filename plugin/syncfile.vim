@@ -17,7 +17,7 @@ let s:global_echo_str=[]
 
 
 if has('g:syncfile_mapping') && g:syncfile_mapping
-  call syncfile#key_mapping()
+  call syncfile#keymapping()
 endif
 
 if !exists(':SUpdate')
@@ -32,7 +32,7 @@ if !exists(':SUpdate')
   command! SCopyRemoteToBuffer call syncfile#copy_remote()
 endif
 
-function! syncfile#key_mapping()
+function! syncfile#keymapping()
   nnoremap <leader>uc <esc>:SyncConfig<CR>
   nnoremap <leader>ua <esc>:SRsyncAll<CR>
   nnoremap <leader>uu <esc>:SUpload<CR>
@@ -67,7 +67,7 @@ endfunction
 
 function! syncfile#showconf()
   if s:load_config()
-    echo l:conf_dict
+    echo g:sync_config
     echom string(getqflist())
   else
     call s:warning_message('No Config File Found!')
