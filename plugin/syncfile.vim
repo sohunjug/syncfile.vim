@@ -17,12 +17,7 @@ let s:global_echo_str=[]
 
 
 if has('g:syncfile_mapping') && g:syncfile_mapping
-  nnoremap <leader>uc <esc>:SyncConfig<CR>
-  nnoremap <leader>ua <esc>:SRsyncAll<CR>
-  nnoremap <leader>uu <esc>:SUpload<CR>
-  nnoremap <leader>ud <esc>:SDownload<CR>
-  nnoremap <leader>urd <esc>:SRsyncDown<CR>
-  nnoremap <leader>uru <esc>:SRsyncUp<CR>
+  call syncfile#key_mapping()
 endif
 
 if !exists(':SUpdate')
@@ -36,6 +31,15 @@ if !exists(':SUpdate')
   command! SConnectToRemote call syncfile#connect_to_remote()
   command! SCopyRemoteToBuffer call syncfile#copy_remote()
 endif
+
+function! syncfile#key_mapping()
+  nnoremap <leader>uc <esc>:SyncConfig<CR>
+  nnoremap <leader>ua <esc>:SRsyncAll<CR>
+  nnoremap <leader>uu <esc>:SUpload<CR>
+  nnoremap <leader>ud <esc>:SDownload<CR>
+  nnoremap <leader>urd <esc>:SRsyncDown<CR>
+  nnoremap <leader>uru <esc>:SRsyncUp<CR>
+endfunction
 
 function! s:load_config()
   let l:conf_dict = {}
