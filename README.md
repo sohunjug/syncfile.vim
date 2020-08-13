@@ -1,2 +1,1 @@
 # syncfile.vim
-# syncfile.vim
