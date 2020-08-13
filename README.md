@@ -3,6 +3,7 @@
 Thanks
 
 - [vim-async](https://github.com/KenN7/vim-arsync)
+- [vim-hsftp](https://github.com/hesselbom/vim-hsftp)
 
 Example Config
 
