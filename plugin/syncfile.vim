@@ -21,7 +21,7 @@ command! SConnectToRemote call syncfile#connect_to_remote()
 command! SCopyRemoteToBuffer call syncfile#copy_remote()
 endif
 
-function! s:syncfile#find_config_file()
+function! s:find_config_file()
   let l:cpath = expand('%:p:h')
   let l:cfile = l:cpath . '/.sync.cfg'
   let l:config = ''
@@ -50,17 +50,17 @@ function! s:syncfile#find_config_file()
   return l:config
 endfunction
 
-function! s:syncfile#is_enabled()
-  if strlen(syncfile#find_config_file()) > 0
+function! s:is_enabled()
+  if strlen(s:find_config_file()) > 0
     return 1
   else
     return 0
   endif
 endfunction
 
-function! s:syncfile#load_config()
+function! s:load_config()
 	let conf = {}
-	let l:cpath = s:syncfile#find_config_file()
+	let l:cpath = s:find_config_file()
 
 	if strlen(l:cpath) > 0
 		let options = readfile(l:cpath)
@@ -72,133 +72,133 @@ function! s:syncfile#load_config()
 	return conf
 endfunction
 
-if !exists('g:syncfile#config')
-	let g:syncfile#prompt = 'syncfile => '
-	let g:syncfile#command = 'scp'
-	let g:syncfile#config = s:syncfile#load_config()
-	if has_key(g:syncfile#config, 'upload_on_save')
-		if g:syncfile#config['upload_on_save'] == 1
-			augroup syncfile#upload_on_save
+if !exists('g:config')
+	let g:prompt = 'syncfile => '
+	let g:command = 'scp'
+	let g:config = s:load_config()
+	if has_key(g:config, 'upload_on_save')
+		if g:config['upload_on_save'] == 1
+			augroup upload_on_save
 				au!
-				au BufWritePost * call g:syncfile#upload_on_save()
+				au BufWritePost * call g:upload_on_save()
 			augroup END
 		else
-			augroup syncfile#upload_on_save
+			augroup upload_on_save
 				au!
 			augroup END
-			augroup! syncfile#upload_on_save
+			augroup! upload_on_save
 		endif
 	endif
 endif
 
-function! s:syncfile#warning_message(msg)
-	echohl WarningMsg | !echo g:syncfile#prompt . a:msg | !echohl None
+function! s:warning_message(msg)
+	echohl WarningMsg | !echo g:prompt . a:msg | !echohl None
 endfunction
 
-function! s:syncfile#info_message(msg)
-	echo g:syncfile#prompt . a:msg
+function! s:info_message(msg)
+	echo g:prompt . a:msg
 endfunction
 
-function! s:syncfile#get_local_path()
+function! s:get_local_path()
 	return expand('%:p')
 endfunction
 
-function! s:syncfile#get_remote_path()
-	let l:localpath = s:syncfile#get_local_path()
-	return g:syncfile#config['remote'] . l:localpath[strlen(g:syncfile#config['local']):]
+function! s:get_remote_path()
+	let l:localpath = s:get_local_path()
+	return g:config['remote'] . l:localpath[strlen(g:config['local']):]
 endfunction
 
-function! s:syncfile#finished_cb(channel)
-	s:syncfile#info_message('Done!')
+function! s:finished_cb(channel)
+	s:info_message('Done!')
 endfunction
 
-function! s:syncfile#on_upload_cb(job_id, data, event) dict
+function! s:on_upload_cb(job_id, data, event) dict
 	if a:event == 'stderr'
-		call s:syncfile#warning_message('Upload error ')
+		call s:warning_message('Upload error ')
 	else
-		call s:syncfile#info_message('Upload finished')
+		call s:info_message('Upload finished')
 	endif
 endfunction
 
 function! syncfile#diff_remote()
-	if s:syncfile#is_enabled() && has_key(g:syncfile#config, 'host')
-		let remotepath = s:syncfile#get_remote_path()
+	if s:is_enabled() && has_key(g:config, 'host')
+		let remotepath = s:get_remote_path()
 		let cmd = printf('diffsplit scp://%s@%s/%s|windo wincmd H', g:mmsftp#config['user'], g:mmsftp#config['host'], remotepath)
 		silent execute cmd
 	endif
 endfunction
 
 function! syncfile#download_file()
-	if s:syncfile#is_enabled() && has_key(g:syncfile#config, 'host')
-		let remotepath = s:syncfile#get_remote_path()
-		let cmd = printf('1,$d|0Nr "sftp://%s@%s/%s"', g:mmsftp#config['user'], g:syncfile#config['host'], remotepath)
-		call s:syncfile#info_message(printf('Downloading %s from %s...', remotepath, g:syncfile#config['host']))
+	if s:is_enabled() && has_key(g:config, 'host')
+		let remotepath = s:get_remote_path()
+		let cmd = printf('1,$d|0Nr "sftp://%s@%s/%s"', g:mmsftp#config['user'], g:config['host'], remotepath)
+		call s:info_message(printf('Downloading %s from %s...', remotepath, g:config['host']))
 		silent execute cmd
-		call s:syncfile#info_message('Done! Saving...')
+		call s:info_message('Done! Saving...')
 		silent execute 'w'
 	endif
 endfunction
 
 function! syncfile#upload_file()
-	if s:syncfile#is_enabled() && has_key(g:syncfile#config, 'host')
-		let localpath = s:syncfile#get_local_path()
-		let remotepath = s:syncfile#get_remote_path()
-		call s:syncfile#info_message('Uploading')
-		let cmd = printf(g:syncfile#command . ' %s %s@%s:%s', localpath, g:syncfile#config['user'], g:syncfile#config['host'], remotepath)
+	if s:is_enabled() && has_key(g:config, 'host')
+		let localpath = s:get_local_path()
+		let remotepath = s:get_remote_path()
+		call s:info_message('Uploading')
+		let cmd = printf(g:command . ' %s %s@%s:%s', localpath, g:config['user'], g:config['host'], remotepath)
 		" silent execute cmd
-		call jobstart(cmd, {'on_exit': function('s:syncfile#on_upload_cb')})
+		call jobstart(cmd, {'on_exit': function('s:on_upload_cb')})
 	endif
 endfunction
 
 function! syncfile#connect_to_remote()
-	if s:syncfile#is_enabled() && has_key(g:syncfile#config, 'host')
-		let cmd = 'vsplit term://sshpass -p ' . g:syncfile#config['pass'] . ' ssh -t ' . g:syncfile#config['user'] . '@' . g:syncfile#config['host']
-		if has_key(g:syncfile#config, 'remote')
-			let cmd = cmd . ' \"cd ' . g:syncfile#config['remote'] . ' && bash\"'
+	if s:is_enabled() && has_key(g:config, 'host')
+		let cmd = 'vsplit term://sshpass -p ' . g:config['pass'] . ' ssh -t ' . g:config['user'] . '@' . g:config['host']
+		if has_key(g:config, 'remote')
+			let cmd = cmd . ' \"cd ' . g:config['remote'] . ' && bash\"'
 		endif
 		silent execute cmd
 	endif
 endfunction
 
 function! syncfile#copy_remote()
-	if s:syncfile#is_enabled() && has_key(g:syncfile#config, 'remote')
-		let @+=g:syncfile#config['remote']
+	if s:is_enabled() && has_key(g:config, 'remote')
+		let @+=g:config['remote']
 	else
-		call s:syncfile#info_message('No remote set in .hsftp')
+		call s:info_message('No remote set in .hsftp')
 	endif
 endfunction
 
-function! s:syncfile#upload_on_save()
-	if s:syncfile#is_enabled() && has_key(g:syncfile#config, 'upload_on_save')
-		if g:syncfile#config['upload_on_save'] == 1
-			let localpath = s:syncfile#get_local_path()
-			let remotepath = s:syncfile#get_remote_path()
-			let cmd = printf(g:syncfile#command . ' %s %s@%s:%s', localpath, g:syncfile#config['user'], g:syncfile#config['host'], remotepath)
-			call jobstart(cmd, {'on_exit': function('s:syncfile#on_upload_cb')})
+function! s:upload_on_save()
+	if s:is_enabled() && has_key(g:config, 'upload_on_save')
+		if g:config['upload_on_save'] == 1
+			let localpath = s:get_local_path()
+			let remotepath = s:get_remote_path()
+			let cmd = printf(g:command . ' %s %s@%s:%s', localpath, g:config['user'], g:config['host'], remotepath)
+			call jobstart(cmd, {'on_exit': function('s:on_upload_cb')})
 		endif
 	endif
 endfunction
 
-function! s:syncfile#configure()
-	call s:syncfile#info_message('Reloading SFTP configuration')
-	let g:syncfile#config = s:syncfile#load_config()
+function! s:configure()
+	call s:info_message('Reloading SFTP configuration')
+	let g:config = s:load_config()
 
-	if has_key(g:syncfile#config, 'upload_on_save')
-		if g:syncfile#config['upload_on_save'] == 1
-			augroup syncfile#upload_on_save
+	if has_key(g:config, 'upload_on_save')
+		if g:config['upload_on_save'] == 1
+			augroup upload_on_save
 				au!
-				au BufWritePost * call s:syncfile#upload_on_save()
+				au BufWritePost * call s:upload_on_save()
 			augroup END
 		else
-			augroup syncfile#upload_on_save
+			augroup upload_on_save
 				au!
 			augroup END
-			augroup! syncfile#upload_on_save
+			augroup! upload_on_save
 		endif
 	endif
 endfunction
 
 augroup mmsftp
-	au! BufWritePost .sync.cfg call s:syncfile#configure()
+	au! BufWritePost .sync.cfg call s:configure()
 augroup END
 
