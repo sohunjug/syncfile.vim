@@ -16,9 +16,7 @@ let s:win_list=[]
 let s:global_echo_str=[]
 
 
-let g:syncfile_mapping = get('g:syncfile_mapping', 1)
-
-if g:syncfile_mapping
+if has('g:syncfile_mapping') && g:syncfile_mapping
   nnoremap <leader>uc <esc>:SyncConfig<CR>
   nnoremap <leader>ua <esc>:SRsyncAll<CR>
   nnoremap <leader>uu <esc>:SUpload<CR>
