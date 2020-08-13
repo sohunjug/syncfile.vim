@@ -11,7 +11,7 @@ Example Config
   "host": "10.0.0.0",
   "port": 222,
   "user": "root",
-  "pass": "root"
+  "pass": "root",
   "remote": "/data/client",
   "ignore_path": ["depend", "*.o"],
   "ignore_dotfiles": true
