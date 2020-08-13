@@ -5,6 +5,21 @@
 " Github: https://github.com/sohunjug/syncfile.vim
 " Author: sohunjug
 " License: MIT
+"
+"
+if get(g:, 'loaded_syncfile', 0)
+  finish
+endif
+
+let g:loaded_syncfile = 1
+
+if !exists(':Supdate')
+command! SDiff call sync#diff_remote()
+command! SDownload call sync#download_file()
+command! SUpload call sync#upload_file()
+command! SConnectToRemote call sync#connect_to_remote()
+command! SCopyRemoteToBuffer call sync#copy_remote()
+endif
 
 function! s:sync#find_config_file()
   let l:cpath = expand('%:p:h')
@@ -105,7 +120,7 @@ function! s:sync#on_upload_cb(job_id, data, event) dict
 	endif
 endfunction
 
-function! s:sync#diff_remote()
+function! sync#diff_remote()
 	if s:sync#is_enabled() && has_key(g:sync#config, 'host')
 		let remotepath = s:sync#get_remote_path()
 		let cmd = printf('diffsplit scp://%s@%s/%s|windo wincmd H', g:mmsftp#config['user'], g:mmsftp#config['host'], remotepath)
@@ -113,7 +128,7 @@ function! s:sync#diff_remote()
 	endif
 endfunction
 
-function! s:sync#download_file()
+function! sync#download_file()
 	if s:sync#is_enabled() && has_key(g:sync#config, 'host')
 		let remotepath = s:sync#get_remote_path()
 		let cmd = printf('1,$d|0Nr "sftp://%s@%s/%s"', g:mmsftp#config['user'], g:sync#config['host'], remotepath)
@@ -124,7 +139,7 @@ function! s:sync#download_file()
 	endif
 endfunction
 
-function! s:sync#upload_file()
+function! sync#upload_file()
 	if s:sync#is_enabled() && has_key(g:sync#config, 'host')
 		let localpath = s:sync#get_local_path()
 		let remotepath = s:sync#get_remote_path()
@@ -135,7 +150,7 @@ function! s:sync#upload_file()
 	endif
 endfunction
 
-function! s:sync#connect_to_remote()
+function! sync#connect_to_remote()
 	if s:sync#is_enabled() && has_key(g:sync#config, 'host')
 		let cmd = 'vsplit term://sshpass -p ' . g:sync#config['pass'] . ' ssh -t ' . g:sync#config['user'] . '@' . g:sync#config['host']
 		if has_key(g:sync#config, 'remote')
@@ -145,7 +160,7 @@ function! s:sync#connect_to_remote()
 	endif
 endfunction
 
-function! s:sync#copy_remote()
+function! sync#copy_remote()
 	if s:sync#is_enabled() && has_key(g:sync#config, 'remote')
 		let @+=g:sync#config['remote']
 	else
@@ -187,11 +202,3 @@ augroup mmsftp
 	au! BufWritePost .sync.cfg call s:sync#configure()
 augroup END
 
-command! Hdiff call s:sync#diff_remote()
-command! Hdownload call s:sync#download_file()
-command! Hupload call s:sync#upload_file()
-command! DiffRemote call s:sync#diff_remote()
-command! DownloadFileFromRemote call s:sync#download_file()
-command! UploadFileToRemote call s:sync#upload_file()
-command! ConnectToRemote call s:sync#connect_to_remote()
-command! CopyRemoteToBuffer call s:sync#copy_remote()
