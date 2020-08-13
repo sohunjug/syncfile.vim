@@ -32,15 +32,6 @@ if !exists(':SUpdate')
   command! SCopyRemoteToBuffer call syncfile#copy_remote()
 endif
 
-function! syncfile#keymapping()
-  nnoremap <leader>uc <esc>:SyncConfig<CR>
-  nnoremap <leader>ua <esc>:SRsyncAll<CR>
-  nnoremap <leader>uu <esc>:SUpload<CR>
-  nnoremap <leader>ud <esc>:SDownload<CR>
-  nnoremap <leader>urd <esc>:SRsyncDown<CR>
-  nnoremap <leader>uru <esc>:SRsyncUp<CR>
-endfunction
-
 function! s:load_config()
   let l:conf_dict = {}
   let l:config_file = findfile('.sync', '.,,;')
