@@ -1,11 +1,11 @@
 # syncfile.vim
 
-Thanks
+## Thanks
 
 - [vim-async](https://github.com/KenN7/vim-arsync)
 - [vim-hsftp](https://github.com/hesselbom/vim-hsftp)
 
-Example Config
+## Example Config
 
 ```json
 {
@@ -21,7 +21,7 @@ Example Config
 ```
 
 
-Commands
+## Commands
 
 - ```:SyncConfig``` shows detected configuration
 - ```:SUpdate``` Syncs current file up to the remote (upload local to remote)
@@ -31,4 +31,11 @@ Commands
 - ```:SRsyncUp``` Syncs project files up to the remote (upload local to remote)
 - ```:SRsyncDown``` Syncs files down from the remote (download remote to local)
 - ```:SDiff``` Compare remote file with local current file
+
+
+## Donate
+
+- BTC: ```34h7ShMp1LxrS7DaSBZcVbhqwKdXAZthyb```
+- ETH: ```0xB44F2feC833f2430e8774f0E4102145f9fF47B51```
+- EOS: ```sohunjug4eos```
 
